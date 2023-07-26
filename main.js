@@ -14,29 +14,29 @@ function preced(o) {
             return 3;
         case '*':
             return 2;
-        case '+' || '-':
+        case '+':
             return 1;
-        default:
-            return -1;
+        case '-':
+            return 1;
     }
 }
 
-function stackLoop(j) {
-    postfix = postfix + ' ' + inStack[j];
+function stackLoop() {
+    postfix += ' ' + inStack.slice(-1);
     inStack.pop()
 }
 
 /*Loops through the stack after entire infix expression is scanned or when a lower (compared to others in the stack) precedence operator is scanned */
-function argCreate(len, text, i, run) {
+function argCreate(len, i, run) {
     j = len
-    if (run == true) {
-        while(j >= 0 && preced(inStack[j]) >= preced(text[i])) {
-            stackLoop(j)
+    if (run) {
+        while(j >= 0 && preced(inStack[j]) >= preced(i)) {
+            stackLoop()
             j -= 1
         }
     } else {
-        while(j>=0) {
-            stackLoop(j)
+        while(j >= 0) {
+            stackLoop()
             j -= 1
         }
     }
@@ -44,37 +44,40 @@ function argCreate(len, text, i, run) {
 
 /*Converts an input infix expression to postfix */
 function postfixConv(text) {
-    for (let i = 0; i < text.length; i++) {
-        if (isNaN(text[i]) == false) {
-            if (i == 0) {
-                postfix += text[i];
+    start = 0
+    for (i of text) {
+        len = inStack.length
+        if (!isNaN(i)) {
+            if (start == 0) {
+                postfix += i;
             } else {
-                postfix = postfix + ' ' + text[i];
+                postfix += ' ' + i;
             }
         } else {
-            if (inStack.length == 0 || preced(text[i]) > preced(inStack.slice(-1))) {
-                inStack.push(text[i])
+            if (len == 0 || preced(i) > preced(inStack.slice(-1))) {
+                inStack.push(i)
             } else {
-                argCreate(inStack.length - 1, text, i, true);
-                inStack.push(text[i]);
+                argCreate(len - 1, i, true);
+                inStack.push(i);
                 }
             }
+        start = 1;
         }
-    argCreate(inStack.length - 1, text, 0, false);
+    argCreate(inStack.length - 1, 0, false);
     return postfix;
     }
 
 /*Evaluates an input postfix expression */
 function postfixEval(statement) {
-    for (let i = 0; i < statement.length; i++) {
-        if (isNaN(statement[i]) == false) {
-            postStack.push(statement[i]);
+    for (i of statement) {
+        if (!isNaN(i)) {
+            postStack.push(i);
         } else {
             num2 = Number(postStack.slice(-1))
             postStack.pop()
             num1 = Number(postStack.slice(-1))
             postStack.pop()
-            switch(statement[i]) {
+            switch(i) {
                 case '÷':
                     postStack.push(num1 / num2);
                     break;
@@ -104,7 +107,7 @@ buttons.forEach(elem => {
             run = true;
             display.value += ' ' + elem.innerHTML;
         } else {
-            if (run == true) {
+            if (run) {
                 display.value += ' ' + elem.innerHTML;
                 run = false;
             } else {
@@ -123,6 +126,7 @@ outButtons.forEach(i => {
             result = 0
         } else {
             text = display.value.split(' ');
+            console.log(text)
             display.value = (postfixEval(postfixConv(text).split(' ')));
             flag = true;
         }
