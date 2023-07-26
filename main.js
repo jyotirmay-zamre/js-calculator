@@ -126,7 +126,6 @@ outButtons.forEach(i => {
             result = 0
         } else {
             text = display.value.split(' ');
-            console.log(text)
             display.value = (postfixEval(postfixConv(text).split(' ')));
             flag = true;
         }
